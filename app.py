@@ -2,6 +2,7 @@ import streamlit as st
 import joblib
 import pickle
 import numpy as np
+import pandas as pd
 
 import psycopg2
 # Fetch variables
@@ -72,30 +73,39 @@ if model is not None:
     
     # Botón de predicción
     if st.button("Predecir Especie"):
-
         # Preparar datos
         features = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
+        
+        # Estandarizar
         features_scaled = scaler.transform(features)
-
-        # Predicción
+        
+        # Predecir
         prediction = model.predict(features_scaled)[0]
         probabilities = model.predict_proba(features_scaled)[0]
-
+        
+        # Mostrar resultado
         target_names = model_info['target_names']
         predicted_species = target_names[prediction]
         confidence = float(max(probabilities))
-
-        # Mostrar resultado
+        
         st.success(f"Especie predicha: **{predicted_species}**")
-        st.write(f"Confianza: **{confidence:.1%}**")
-
+        st.write(f"Confianza: **{max(probabilities):.1%}**")
+        
+        # Mostrar todas las probabilidades
         st.write("Probabilidades:")
         for species, prob in zip(target_names, probabilities):
             st.write(f"- {species}: {prob:.1%}")
 
         # 💾 GUARDAR EN BD
         try:
-            conn = get_connection()
+            conn = psycopg2.connect(
+                user=USER,
+                password=PASSWORD,
+                host=HOST,
+                port=PORT,
+                dbname=DBNAME
+            )
+
             cursor = conn.cursor()
 
             insert_query = """
@@ -123,10 +133,17 @@ if model is not None:
             st.error(f"Error al guardar: {e}")
 
 # HISTÓRICO
-st.header("Histórico de Predicciones")
+st.header("📊 Histórico de Predicciones")
 
 try:
-    conn = get_connection()
+    conn = psycopg2.connect(
+        user=USER,
+        password=PASSWORD,
+        host=HOST,
+        port=PORT,
+        dbname=DBNAME
+    )
+    
     cursor = conn.cursor()
 
     query = """
