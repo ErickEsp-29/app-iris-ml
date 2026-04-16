@@ -72,24 +72,88 @@ if model is not None:
     
     # Botón de predicción
     if st.button("Predecir Especie"):
+
         # Preparar datos
         features = np.array([[sepal_length, sepal_width, petal_length, petal_width]])
-        
-        # Estandarizar
         features_scaled = scaler.transform(features)
-        
-        # Predecir
+
+        # Predicción
         prediction = model.predict(features_scaled)[0]
         probabilities = model.predict_proba(features_scaled)[0]
-        
-        # Mostrar resultado
+
         target_names = model_info['target_names']
         predicted_species = target_names[prediction]
-        
+        confidence = float(max(probabilities))
+
+        # Mostrar resultado
         st.success(f"Especie predicha: **{predicted_species}**")
-        st.write(f"Confianza: **{max(probabilities):.1%}**")
-        
-        # Mostrar todas las probabilidades
+        st.write(f"Confianza: **{confidence:.1%}**")
+
         st.write("Probabilidades:")
         for species, prob in zip(target_names, probabilities):
             st.write(f"- {species}: {prob:.1%}")
+
+        # 💾 GUARDAR EN BD
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+
+            insert_query = """
+            INSERT INTO tb_iris 
+            (l_s, a_s, l_p, a_p, prediccion, confidence)
+            VALUES (%s, %s, %s, %s, %s, %s);
+            """
+
+            cursor.execute(insert_query, (
+                sepal_length,
+                sepal_width,
+                petal_length,
+                petal_width,
+                predicted_species,
+                confidence
+            ))
+
+            conn.commit()
+            cursor.close()
+            conn.close()
+
+            st.success("✅ Guardado en la base de datos")
+
+        except Exception as e:
+            st.error(f"Error al guardar: {e}")
+
+# HISTÓRICO
+st.header("Histórico de Predicciones")
+
+try:
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    query = """
+    SELECT l_s, a_s, l_p, a_p, prediccion, confidence, created_at
+    FROM tb_iris
+    ORDER BY created_at DESC;
+    """
+
+    cursor.execute(query)
+    rows = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    if rows:
+        df = pd.DataFrame(rows, columns=[
+            "Sepal Length",
+            "Sepal Width",
+            "Petal Length",
+            "Petal Width",
+            "Predicción",
+            "Confianza",
+            "Fecha"
+        ])
+        st.dataframe(df)
+    else:
+        st.info("No hay registros aún.")
+
+except Exception as e:
+    st.error(f"Error al cargar histórico: {e}")
