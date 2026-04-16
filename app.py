@@ -148,7 +148,7 @@ try:
 
     query = """
     SELECT l_s, a_s, l_p, a_p, prediccion, confidence, created_at
-    FROM tb_iris
+    FROM ml.tb_iris
     ORDER BY created_at DESC;
     """
 
