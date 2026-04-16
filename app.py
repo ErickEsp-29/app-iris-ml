@@ -6,7 +6,7 @@ import numpy as np
 import psycopg2
 # Fetch variables
 USER = "postgres.mljzyorzsdiyduooewif" #os.getenv("user")
-PASSWORD = "olier atoZ1"# os.getenv("password")
+PASSWORD = "xxxxx"# os.getenv("password")
 HOST = "aws-1-us-east-1.pooler.supabase.com" #os.getenv("host")
 PORT = "6543" #os.getenv("port")
 DBNAME = "postgres" #os.getenv("dbname")
