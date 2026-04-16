@@ -110,7 +110,7 @@ if model is not None:
 
             insert_query = """
             INSERT INTO ml.tb_iris 
-            (l_s, a_s, l_p, a_p, prediccion, confidence)
+            (I_s, a_s, I_p, a_p, prediccion, confidence)
             VALUES (%s, %s, %s, %s, %s, %s);
             """
 
@@ -147,7 +147,7 @@ try:
     cursor = conn.cursor()
 
     query = """
-    SELECT l_s, a_s, l_p, a_p, prediccion, confidence, created_at
+    SELECT I_s, a_s, I_p, a_p, prediccion, confidence, created_at
     FROM ml.tb_iris
     ORDER BY created_at DESC;
     """
