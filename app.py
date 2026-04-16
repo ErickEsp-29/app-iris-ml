@@ -109,7 +109,7 @@ if model is not None:
             cursor = conn.cursor()
 
             insert_query = """
-            INSERT INTO tb_iris 
+            INSERT INTO ml.tb_iris 
             (l_s, a_s, l_p, a_p, prediccion, confidence)
             VALUES (%s, %s, %s, %s, %s, %s);
             """
